@@ -1,0 +1,53 @@
+# Command to test all API endpoints for the Crop Monitoring API
+
+# Note: Run these commands one by one in your terminal.
+# Make sure your FastAPI server is running before you start.
+
+# 1. POST /readings/ - Create a new reading
+# This command creates a new reading and returns the created object, including its new ID.
+echo "--- Testing POST /readings/ ---"
+curl -X POST "http://127.0.0.1:8000/readings/" \
+-H "Content-Type: application/json" \
+-d '{ 
+  "moi": 550, 
+  "temp": 25.5, 
+  "humidity": 60.2, 
+  "result": 1, 
+  "crop_name": "Corn", 
+  "soil_type_name": "Loam", 
+  "growth_stage_name": "Vegetative" 
+}'
+echo "\n"
+
+# 2. GET /readings/ - Get all readings
+echo "--- Testing GET /readings/ ---"
+curl -X GET "http://127.0.0.1:8000/readings/"
+echo "\n"
+
+# 3. GET /readings/{reading_id} - Get a single reading
+# IMPORTANT: Replace '1' with the actual ID of a reading in your database.
+echo "--- Testing GET /readings/1 ---"
+curl -X GET "http://127.0.0.1:8000/readings/1"
+echo "\n"
+
+# 4. PUT /readings/{reading_id} - Update a reading
+# IMPORTANT: Replace '1' with the actual ID of a reading in your database.
+echo "--- Testing PUT /readings/1 ---"
+curl -X PUT "http://127.0.0.1:8000/readings/1" \
+-H "Content-Type: application/json" \
+-d '{ 
+  "moi": 600, 
+  "temp": 26.0, 
+  "humidity": 65.0, 
+  "result": 0, 
+  "crop_name": "Wheat", 
+  "soil_type_name": "Clay", 
+  "growth_stage_name": "Flowering" 
+}'
+echo "\n"
+
+# 5. DELETE /readings/{reading_id} - Delete a reading
+# IMPORTANT: Replace '1' with the actual ID of a reading in your database.
+echo "--- Testing DELETE /readings/1 ---"
+curl -X DELETE "http://127.0.0.1:8000/readings/1"
+echo "\n"
