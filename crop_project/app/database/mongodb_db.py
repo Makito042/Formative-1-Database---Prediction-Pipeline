@@ -1,9 +1,15 @@
+import os
 from typing import List, Dict, Any, Optional
 from bson import ObjectId
-from pymongo import MongoClient, ASCENDING, DESCENDING, ReturnDocument
+from pymongo import MongoClient, ASCENDING, DESCENDING, ReturnDocument, server_api
 from pymongo.database import Database as MongoDatabase
+from pymongo.errors import ConnectionFailure
 from datetime import datetime
+from dotenv import load_dotenv
 from .base import Database
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def convert_mongo_id(doc: Dict[str, Any]) -> Dict[str, Any]:
@@ -16,10 +22,29 @@ def convert_mongo_id(doc: Dict[str, Any]) -> Dict[str, Any]:
 
 
 class MongoDB(Database):
-    def __init__(self, connection_string: str = "mongodb://localhost:27017/", db_name: str = "crop_monitoring"):
-        self.client = MongoClient(connection_string)
-        self.db: MongoDatabase = self.client[db_name]
-        self._setup_collections()
+    def __init__(self, connection_string: str = None, db_name: str = "crop_monitoring"):
+        # Get connection string from environment variables if not provided
+        connection_string = connection_string or os.getenv(
+            "MONGODB_URI", 
+            "mongodb://localhost:27017/"
+        )
+        
+        # Create a new client and connect to the server
+        try:
+            self.client = MongoClient(
+                connection_string,
+                server_api=server_api.ServerApi('1')
+            )
+            # Test the connection
+            self.client.admin.command('ping')
+            print("Successfully connected to MongoDB!")
+            
+            self.db: MongoDatabase = self.client[db_name]
+            self._setup_collections()
+            
+        except ConnectionFailure as e:
+            print(f"Failed to connect to MongoDB: {e}")
+            raise
 
     def _setup_collections(self) -> None:
         """Set up collections and indexes."""
@@ -239,3 +264,4 @@ class MongoDB(Database):
 
     def close(self) -> None:
         self.client.close()
+
